@@ -1,24 +1,12 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-
-const app = express();
-app.use(bodyParser.json());
-
-// Sample student attendance percentage data
-const attendanceData = {
-  "101": 92,
-  "102": 75,
-  "103": 88,
-  "104": 67,
-  "105": 95
-};
-
-// Webhook endpoint for Dialogflow
 app.post("/webhook", (req, res) => {
+  console.log("Dialogflow request body:", JSON.stringify(req.body, null, 2));
+
   const intent = req.body.queryResult.intent.displayName;
+  const parameters = req.body.queryResult.parameters;
 
   if (intent === "GiveAttendance") {
-    const roll = req.body.queryResult.parameters["roll"];
+    // ✅ use your custom entity parameter name
+    const roll = parameters["roll_number"];  
 
     if (!roll) {
       return res.json({
@@ -43,10 +31,4 @@ app.post("/webhook", (req, res) => {
   res.json({
     fulfillmentText: "Sorry, I didn’t understand that."
   });
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Webhook running on port ${PORT}`);
 });
