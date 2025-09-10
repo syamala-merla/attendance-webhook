@@ -1,0 +1,52 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+
+const app = express();
+app.use(bodyParser.json());
+
+// Sample student attendance percentage data
+const attendanceData = {
+  "101": 92,
+  "102": 75,
+  "103": 88,
+  "104": 67,
+  "105": 95
+};
+
+// Webhook endpoint for Dialogflow
+app.post("/webhook", (req, res) => {
+  const intent = req.body.queryResult.intent.displayName;
+
+  if (intent === "GiveAttendance") {
+    const roll = req.body.queryResult.parameters["roll"];
+
+    if (!roll) {
+      return res.json({
+        fulfillmentText: "Please provide a roll number to check attendance."
+      });
+    }
+
+    const percentage = attendanceData[roll];
+
+    if (percentage !== undefined) {
+      return res.json({
+        fulfillmentText: `The attendance percentage for roll number ${roll} is ${percentage}%.`
+      });
+    } else {
+      return res.json({
+        fulfillmentText: `I don’t have attendance data for roll number ${roll}.`
+      });
+    }
+  }
+
+  // Default fallback
+  res.json({
+    fulfillmentText: "Sorry, I didn’t understand that."
+  });
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Webhook running on port ${PORT}`);
+});
